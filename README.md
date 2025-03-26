@@ -101,13 +101,3 @@ personalityTest/
 ├── requirements.txt        # Python dependencies
 └── README.md               # Project documentation
 ```
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgements
-
-- MBTI personality framework
-- OpenAI for the language model
-- Langchain for the conversational AI toolkit 
