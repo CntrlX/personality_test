@@ -93,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function showResults(resultContent) {
+        // For debugging - log the raw result content
+        console.log("Raw result content:", resultContent);
+        
         // Hide chat container and show results
         document.querySelector('.chat-container').classList.add('hidden');
         resultContainer.classList.remove('hidden');
@@ -103,42 +106,78 @@ document.addEventListener('DOMContentLoaded', () => {
             const mbtiType = mbtiTypeMatch[1];
             const mbtiTypeTitle = getMbtiTypeTitle(mbtiType);
             mbtiTitle.innerHTML = `${mbtiType}: ${mbtiTypeTitle}`;
+            console.log("Found MBTI type:", mbtiType);
+        } else {
+            console.error("Failed to match MBTI type");
+            // Fallback to display something
+            mbtiTitle.innerHTML = "Your Personality Type";
         }
         
-        // Extract overview
-        const overviewMatch = resultContent.match(/📝 Overview\s*([\s\S]*?)(?=\n\n🔥 Roast|\n\n🎯)/i);
+        // Extract overview - updated regex to be more flexible
+        const overviewMatch = resultContent.match(/📝\s*Overview([\s\S]*?)(?=🔥\s*Roast|🎯)/i);
         if (overviewMatch) {
             mbtiOverview.innerHTML = formatBotMessage(overviewMatch[1]);
+            console.log("Found overview");
+        } else {
+            console.error("Failed to match overview section");
+            // Fallback for overview
+            const descriptionMatch = resultContent.match(/🎉.*?(\w{4})\s*([\s\S]*?)(?=📝|🔥|🎯)/i);
+            if (descriptionMatch) {
+                mbtiOverview.innerHTML = formatBotMessage(descriptionMatch[2]);
+                console.log("Found description as fallback for overview");
+            } else {
+                mbtiOverview.innerHTML = "<p>No overview available</p>";
+            }
         }
         
-        // Extract roast
-        const roastMatch = resultContent.match(/🔥 Roast\s*([\s\S]*?)(?=\n\n🎯)/i);
+        // Extract roast - updated regex to be more flexible
+        const roastMatch = resultContent.match(/🔥\s*Roast([\s\S]*?)(?=🎯)/i);
         if (roastMatch) {
             roastContainer.innerHTML = formatBotMessage(roastMatch[1]);
+            console.log("Found roast");
+        } else {
+            console.error("Failed to match roast section");
+            roastContainer.innerHTML = "<p>No roast available</p>";
         }
         
-        // Extract recommendations
-        const recommendationsMatch = resultContent.match(/🎯.*?recommendations.*?\s*([\s\S]*?)(?=\n\nWho are your celebrity|\n\nRemember)/i);
+        // Extract recommendations - updated regex to be more flexible
+        const recommendationsMatch = resultContent.match(/🎯[\s\S]*?recommendations([\s\S]*?)(?=Who are your celebrity|Remember|Career|Relationship)/i);
         if (recommendationsMatch) {
             displayRecommendations(recommendationsMatch[1]);
+            console.log("Found recommendations");
+        } else {
+            console.error("Failed to match recommendations section");
+            recommendations.innerHTML = "<p>No recommendations available</p>";
         }
         
-        // Extract doppelgangers
-        const doppelgangersMatch = resultContent.match(/Who are your celebrity doppelgangers\?\s*([\s\S]*?)(?=\n\nRelationship|\n\nRemember)/i);
+        // Extract doppelgangers - updated regex to be more flexible
+        const doppelgangersMatch = resultContent.match(/Who are your celebrity doppelgangers\?([\s\S]*?)(?=Relationship|Career|Remember)/i);
         if (doppelgangersMatch) {
             displayDoppelgangers(doppelgangersMatch[1]);
+            console.log("Found doppelgangers");
+        } else {
+            console.error("Failed to match doppelgangers section");
+            doppelgangers.innerHTML = "<p>No celebrity doppelgangers available</p>";
         }
         
-        // Extract relationship insights
-        const relationshipMatch = resultContent.match(/Relationship\s*([\s\S]*?)(?=\n\nCareer insights|\n\nRemember)/i);
+        // Extract relationship insights - updated regex to be more flexible
+        const relationshipMatch = resultContent.match(/Relationship([\s\S]*?)(?=Career|Remember)/i);
         if (relationshipMatch) {
             relationshipInsights.innerHTML = formatBotMessage(relationshipMatch[1]);
+            console.log("Found relationship insights");
+        } else {
+            console.error("Failed to match relationship section");
+            relationshipInsights.innerHTML = "<p>No relationship insights available</p>";
         }
         
-        // Extract career insights
-        const careerMatch = resultContent.match(/Career insights\s*([\s\S]*?)(?=\n\nRemember|$)/i);
+        // Extract career insights - updated regex to be more flexible
+        const careerMatch = resultContent.match(/Career insights?([\s\S]*?)(?=Remember|$)/i);
         if (careerMatch) {
             careerInsights.innerHTML = formatBotMessage(careerMatch[1]);
+            console.log("Found career insights");
+        } else {
+            console.error("Failed to match career section");
+            careerInsights.innerHTML = "<p>No career insights available</p>";
         }
     }
     
@@ -177,14 +216,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayRecommendations(content) {
+        console.log("Raw recommendations content:", content);
         // Clear previous recommendations
         recommendations.innerHTML = '';
         
+        // If content is empty or doesn't contain categories, display a message
+        if (!content || !content.trim()) {
+            recommendations.innerHTML = "<p>No recommendations available</p>";
+            return;
+        }
+        
         // Create categories
         const categories = ['Music', 'Books', 'Movies'];
+        let anyCategories = false;
+        
         categories.forEach(category => {
-            const categoryMatch = content.match(new RegExp(`${category}:([\\s\\S]*?)(?=\\n\\n|$)`));
-            if (categoryMatch) {
+            // More flexible regex to match category sections
+            const categoryMatch = content.match(new RegExp(`${category}:?([\\s\\S]*?)(?=(?:Music|Books|Movies):?|$)`, 'i'));
+            if (categoryMatch && categoryMatch[1].trim()) {
+                anyCategories = true;
                 const categoryContent = categoryMatch[1];
                 
                 const categoryDiv = document.createElement('div');
@@ -199,49 +249,94 @@ document.addEventListener('DOMContentLoaded', () => {
                 recommendations.appendChild(categoryDiv);
             }
         });
+        
+        // If no categories were found, display the content directly
+        if (!anyCategories) {
+            recommendations.innerHTML = `<div class="recommendation-content">${formatBotMessage(content)}</div>`;
+        }
     }
     
     function formatRecommendationItems(content) {
-        return content
-            .split('\n')
-            .filter(item => item.trim().match(/^\d+\.|^-/)) // Match lines starting with number and dot or dash
-            .map(item => `
-                <div class="recommendation-item">
-                    <p>${item.trim()}</p>
-                </div>
-            `)
-            .join('');
-    }
-    
-    function displayDoppelgangers(content) {
-        // Clear previous doppelgangers
-        doppelgangers.innerHTML = '';
-        
-        // Format content for display
-        const doppelgangerItems = content
+        const items = content
             .split('\n')
             .filter(item => item.trim())
             .map(item => {
-                const itemText = item.trim();
-                if (itemText.match(/^\d+\.|^-/)) {
-                    const parts = itemText.replace(/^\d+\.|^-/, '').trim().split(':');
-                    if (parts.length > 1) {
-                        const name = parts[0].trim();
-                        const description = parts.slice(1).join(':').trim();
-                        
-                        return `
-                            <div class="doppelganger-item">
-                                <h4>${name}</h4>
-                                <p>${description}</p>
-                            </div>
-                        `;
-                    }
+                const trimmedItem = item.trim();
+                // More flexible pattern to match recommendations
+                if (trimmedItem.match(/^\d+[\.\):]|^-|^\*/)) {
+                    return `
+                        <div class="recommendation-item">
+                            <p>${trimmedItem}</p>
+                        </div>
+                    `;
                 }
                 return '';
             })
             .join('');
+            
+        return items || `<p>${content.trim()}</p>`;
+    }
+    
+    function displayDoppelgangers(content) {
+        console.log("Raw doppelgangers content:", content);
+        // Clear previous doppelgangers
+        doppelgangers.innerHTML = '';
         
-        doppelgangers.innerHTML = doppelgangerItems;
+        // If content is empty, display a message
+        if (!content || !content.trim()) {
+            doppelgangers.innerHTML = "<p>No celebrity doppelgangers available</p>";
+            return;
+        }
+        
+        // Split by lines and try to extract doppelgangers
+        const lines = content.split('\n').filter(line => line.trim());
+        
+        // If there are no lines, display the raw content
+        if (lines.length === 0) {
+            doppelgangers.innerHTML = formatBotMessage(content);
+            return;
+        }
+        
+        // Process each line
+        const doppelgangerItems = lines
+            .map(line => {
+                const trimmedLine = line.trim();
+                // Try to match a numbered or bulleted item
+                const itemMatch = trimmedLine.match(/^(\d+[\.\):]|[-*])\s*(.*)/);
+                if (itemMatch) {
+                    // Try to split into name and description
+                    const itemContent = itemMatch[2];
+                    const parts = itemContent.split(/:\s*(.+)/);
+                    
+                    if (parts.length > 1) {
+                        // We have a name and description
+                        return `
+                            <div class="doppelganger-item">
+                                <h4>${parts[0].trim()}</h4>
+                                <p>${parts[1].trim()}</p>
+                            </div>
+                        `;
+                    } else {
+                        // No colon separation, treat whole line as content
+                        return `
+                            <div class="doppelganger-item">
+                                <p>${itemContent}</p>
+                            </div>
+                        `;
+                    }
+                } else if (trimmedLine) {
+                    // Not a list item but has content
+                    return `
+                        <div class="doppelganger-item">
+                            <p>${trimmedLine}</p>
+                        </div>
+                    `;
+                }
+                return '';
+            })
+            .join('');
+            
+        doppelgangers.innerHTML = doppelgangerItems || formatBotMessage(content);
     }
     
     function toggleVoice() {
@@ -273,6 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     socket.on('response', (data) => {
+        console.log('Socket response received:', data);
+        
         if (data.voice_input) {
             // Add the transcribed voice input to chat
             addMessageToChat('user', data.voice_input);
@@ -281,6 +378,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.is_complete && data.mbti_result) {
             // Test is complete, show results
             addMessageToChat('bot', 'Great! Your test is now complete. Here are your results...');
+            
+            // Log the raw message for debugging
+            console.log('Complete MBTI result received:', {
+                mbtiType: data.mbti_result,
+                messageLength: data.message ? data.message.length : 0,
+                messagePreview: data.message ? data.message.substring(0, 100) + '...' : 'No message'
+            });
+            
+            // Process the results
             showResults(data.message);
             
             // Stop voice input when test is complete
