@@ -4,11 +4,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const resultContainer = document.getElementById('result-container');
-    const mbtiResult = document.getElementById('mbti-result');
+    const mbtiTitle = document.getElementById('mbti-title');
+    const mbtiOverview = document.getElementById('mbti-overview');
+    const roastContainer = document.getElementById('roast-container');
+    const roastToggle = document.getElementById('roast-toggle');
+    const recommendations = document.getElementById('recommendations');
+    const doppelgangers = document.getElementById('doppelgangers');
+    const relationshipInsights = document.getElementById('relationship-insights');
+    const careerInsights = document.getElementById('career-insights');
     const voiceToggle = document.getElementById('voice-toggle');
     const voiceIndicator = document.getElementById('voice-indicator');
-    const recommendations = document.getElementById('recommendations');
-    const doppelgangers = document.getElementById('doppelgangers'); // New element for doppelgangers
     
     // Voice state
     let isVoiceActive = false;
@@ -28,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     voiceToggle.addEventListener('click', toggleVoice);
+    roastToggle.addEventListener('click', toggleRoast);
     
     // Functions
     function init() {
@@ -87,43 +93,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function showResults(resultContent) {
-        mbtiResult.innerHTML = formatBotMessage(resultContent);
+        // Hide chat container and show results
         document.querySelector('.chat-container').classList.add('hidden');
         resultContainer.classList.remove('hidden');
         
-        // Format and display recommendations
-        const recommendationsMatch = resultContent.match(/🎯.*?recommendations.*?\n\n([\s\S]*?)(?=\n\nRemember|$)/i);
-        if (recommendationsMatch) {
-            const recommendationsContent = recommendationsMatch[1];
-            displayRecommendations(recommendationsContent);
+        // Extract MBTI type and title
+        const mbtiTypeMatch = resultContent.match(/🎉 Your MBTI Personality Type: (\w{4})/);
+        if (mbtiTypeMatch) {
+            const mbtiType = mbtiTypeMatch[1];
+            const mbtiTypeTitle = getMbtiTypeTitle(mbtiType);
+            mbtiTitle.innerHTML = `${mbtiType}: ${mbtiTypeTitle}`;
         }
         
-        // Format and display doppelgangers
-        const doppelgangersMatch = resultContent.match(/🌟.*?celebrity doppelgangers.*?\n\n([\s\S]*?)(?=\n\nRemember|$)/i);
+        // Extract overview
+        const overviewMatch = resultContent.match(/📝 Overview\s*([\s\S]*?)(?=\n\n🔥 Roast|\n\n🎯)/i);
+        if (overviewMatch) {
+            mbtiOverview.innerHTML = formatBotMessage(overviewMatch[1]);
+        }
+        
+        // Extract roast
+        const roastMatch = resultContent.match(/🔥 Roast\s*([\s\S]*?)(?=\n\n🎯)/i);
+        if (roastMatch) {
+            roastContainer.innerHTML = formatBotMessage(roastMatch[1]);
+        }
+        
+        // Extract recommendations
+        const recommendationsMatch = resultContent.match(/🎯.*?recommendations.*?\s*([\s\S]*?)(?=\n\nWho are your celebrity|\n\nRemember)/i);
+        if (recommendationsMatch) {
+            displayRecommendations(recommendationsMatch[1]);
+        }
+        
+        // Extract doppelgangers
+        const doppelgangersMatch = resultContent.match(/Who are your celebrity doppelgangers\?\s*([\s\S]*?)(?=\n\nRelationship|\n\nRemember)/i);
         if (doppelgangersMatch) {
-            const doppelgangersContent = doppelgangersMatch[1];
-            displayDoppelgangers(doppelgangersContent);
+            displayDoppelgangers(doppelgangersMatch[1]);
+        }
+        
+        // Extract relationship insights
+        const relationshipMatch = resultContent.match(/Relationship\s*([\s\S]*?)(?=\n\nCareer insights|\n\nRemember)/i);
+        if (relationshipMatch) {
+            relationshipInsights.innerHTML = formatBotMessage(relationshipMatch[1]);
+        }
+        
+        // Extract career insights
+        const careerMatch = resultContent.match(/Career insights\s*([\s\S]*?)(?=\n\nRemember|$)/i);
+        if (careerMatch) {
+            careerInsights.innerHTML = formatBotMessage(careerMatch[1]);
         }
     }
+    
+    function getMbtiTypeTitle(mbtiType) {
+        const mbtiTitles = {
+            "ISTJ": "The Inspector",
+            "ISFJ": "The Protector",
+            "INFJ": "The Counselor",
+            "INTJ": "The Mastermind",
+            "ISTP": "The Craftsman",
+            "ISFP": "The Composer",
+            "INFP": "The Healer",
+            "INTP": "The Architect",
+            "ESTP": "The Dynamo",
+            "ESFP": "The Performer",
+            "ENFP": "The Champion",
+            "ENTP": "The Visionary",
+            "ESTJ": "The Supervisor",
+            "ESFJ": "The Provider",
+            "ENFJ": "The Teacher",
+            "ENTJ": "The Commander"
+        };
+        return mbtiTitles[mbtiType] || "The Personality";
+    }
+    
     function toggleRoast() {
-        const roastContainer = document.getElementById('roast-container');
-        const roastToggleButton = document.getElementById('roast-toggle');
-        
         if (roastContainer.classList.contains('hidden')) {
             // Show roast
             roastContainer.classList.remove('hidden');
-            roastToggleButton.textContent = 'Hide Roast';
+            roastToggle.textContent = 'Hide Roast';
         } else {
             // Hide roast
             roastContainer.classList.add('hidden');
-            roastToggleButton.textContent = 'Roast Me';
+            roastToggle.textContent = 'Roast Me';
         }
-    }
-
-    // Add roast toggle button event listener
-    const roastToggleButton = document.getElementById('roast-toggle');
-    if (roastToggleButton) {
-        roastToggleButton.addEventListener('click', toggleRoast);
     }
 
     function displayRecommendations(content) {
@@ -154,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatRecommendationItems(content) {
         return content
             .split('\n')
-            .filter(item => item.trim().match(/^\d+\./)) // Match lines starting with number and dot
+            .filter(item => item.trim().match(/^\d+\.|^-/)) // Match lines starting with number and dot or dash
             .map(item => `
                 <div class="recommendation-item">
                     <p>${item.trim()}</p>
@@ -167,26 +217,32 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear previous doppelgangers
         doppelgangers.innerHTML = '';
         
-        // Split content into individual doppelganger entries
-        const doppelgangerEntries = content.split('\n**').filter(entry => entry.trim());
+        // Format content for display
+        const doppelgangerItems = content
+            .split('\n')
+            .filter(item => item.trim())
+            .map(item => {
+                const itemText = item.trim();
+                if (itemText.match(/^\d+\.|^-/)) {
+                    const parts = itemText.replace(/^\d+\.|^-/, '').trim().split(':');
+                    if (parts.length > 1) {
+                        const name = parts[0].trim();
+                        const description = parts.slice(1).join(':').trim();
+                        
+                        return `
+                            <div class="doppelganger-item">
+                                <h4>${name}</h4>
+                                <p>${description}</p>
+                            </div>
+                        `;
+                    }
+                }
+                return '';
+            })
+            .join('');
         
-        doppelgangerEntries.forEach(entry => {
-            // Split name and description
-            const lines = entry.split('\n');
-            const name = lines[0].trim();
-            const description = lines.slice(1).join(' ').trim();
-            
-            const doppelgangerDiv = document.createElement('div');
-            doppelgangerDiv.className = 'doppelganger-item';
-            doppelgangerDiv.innerHTML = `
-                <h4>${name}</h4>
-                <p>${description}</p>
-            `;
-            
-            doppelgangers.appendChild(doppelgangerDiv);
-        });
+        doppelgangers.innerHTML = doppelgangerItems;
     }
-    
     
     function toggleVoice() {
         if (isVoiceActive) {
