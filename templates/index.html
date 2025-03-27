@@ -40,11 +40,46 @@
             </div>
             
             <div id="result-container" class="result-container hidden">
-                <h2>Your Results</h2>
-                <div id="mbti-result"></div>
-                <div id="recommendations" class="recommendations">
-                    <!-- Recommendations will appear here -->
+                <!-- MBTI Title (e.g., ENTJ: The Commander) -->
+                <div id="mbti-title" class="mbti-title"></div>
+                
+                <!-- Overview Section -->
+                <div class="result-section">
+                    <h3>Overview</h3>
+                    <div id="mbti-overview" class="section-content"></div>
                 </div>
+                
+                <!-- Roast Section (with toggle button) -->
+                <div class="result-section roast-section">
+                    <h3>Personality Roast</h3>
+                    <button id="roast-toggle" class="toggle-button">Roast Me</button>
+                    <div id="roast-container" class="section-content hidden"></div>
+                </div>
+                
+                <!-- Recommendations Section -->
+                <div class="result-section">
+                    <h3>Recommendations</h3>
+                    <div id="recommendations" class="section-content"></div>
+                </div>
+                
+                <!-- Celebrity Doppelgangers Section -->
+                <div class="result-section">
+                    <h3>Celebrity Doppelgangers</h3>
+                    <div id="doppelgangers" class="section-content"></div>
+                </div>
+                
+                <!-- Relationship Insights Section -->
+                <div class="result-section">
+                    <h3>Relationship Insights</h3>
+                    <div id="relationship-insights" class="section-content"></div>
+                </div>
+                
+                <!-- Career Insights Section -->
+                <div class="result-section">
+                    <h3>Career Insights</h3>
+                    <div id="career-insights" class="section-content"></div>
+                </div>
+                
                 <a href="/" class="restart-button">Take Test Again</a>
             </div>
         </main>

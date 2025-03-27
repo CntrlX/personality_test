@@ -168,26 +168,114 @@ main {
     animation: fadeIn 0.5s ease;
 }
 
-.result-container h2 {
+/* MBTI Title Styling */
+.mbti-title {
     color: var(--primary-light);
     margin-bottom: 1.5rem;
     text-align: center;
-    font-size: 2rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--card-bg);
 }
 
-#mbti-result {
+/* Result Sections */
+.result-section {
+    margin-bottom: 2.5rem;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition);
+}
+
+.result-section h3 {
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-content {
     line-height: 1.8;
 }
 
-#mbti-result p {
-    margin-bottom: 1rem;
+/* Roast Section */
+.roast-section {
+    position: relative;
 }
 
-#mbti-result h3 {
+.toggle-button {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.toggle-button:hover {
+    background-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+#roast-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: rgba(244, 67, 54, 0.1);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--error-color);
+}
+
+/* Recommendations and Doppelgangers */
+.recommendation-category, 
+.doppelganger-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: rgba(79, 195, 247, 0.05);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.recommendation-category h4,
+.doppelganger-item h4 {
     color: var(--accent-color);
-    margin: 1.5rem 0 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
 }
 
+.recommendation-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.recommendation-item {
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.recommendation-item:hover,
+.doppelganger-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* Relationship and Career Insights */
+#relationship-insights,
+#career-insights {
+    padding: 1rem;
+}
+
+/* Restart Button */
 .restart-button {
     display: inline-block;
     background-color: var(--primary-color);
@@ -244,6 +332,26 @@ footer {
     
     .message {
         max-width: 90%;
+    }
+    
+    .mbti-title {
+        font-size: 1.8rem;
+    }
+    
+    .result-section h3 {
+        font-size: 1.3rem;
+    }
+    
+    .recommendation-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .toggle-button {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 1rem;
+        display: block;
     }
 }
 
@@ -366,34 +474,6 @@ footer {
     color: var(--text-secondary);
 }
 
-/* Roast Section Styles */
-.roast-section {
-    margin-top: 20px;
-    padding: 20px;
-    background: var(--card-bg);
-    border-radius: var(--border-radius);
-}
-
-#roast-toggle {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    margin-bottom: 15px;
-}
-
-#roast-toggle:hover {
-    background-color: var(--primary-light);
-}
-
-#roast-container {
-    background-color: var(--darker-bg);
-    padding: 15px;
-    border-radius: var(--border-radius);
-}
 /* Animations */
 @keyframes pulse {
     0% {
